@@ -216,7 +216,7 @@ $$
 \frac{d}{dt}\mathbb{E}[f(X_t)] = \frac{d}{dt} \int f(x) p_t(x) dx
 $$
 
-As expectation and derivative are linear operators, we can interchange them. That is, it doesn't matter in which order we apply the linear transformations. Thus,
+As expectation and derivative are linear operators and they both exist in this case, we can interchange them. That is, it doesn't matter in which order we apply the linear transformations. Thus,
 
 <a name="eq:eq7"></a>
 $$
@@ -246,10 +246,111 @@ On substituting this in equation <a href="#eq:eq7">(7)</a>:
 
 $$
 \begin{align*}
-\mathbb{E}\left[ \nabla f(X_t)^\top \left[ \frac{dX_t}{dt} \right] \right] & = \int f(x) \frac{\partial p_t(x)}{\partial t} dx \\
-\mathbb{E}\left[ \nabla f(X_t)^\top v_t(X_t) \right] & = \int f(x) \frac{\partial p_t(x)}{\partial t} dx \\
-\int \nabla f(x)^\top v_t(x) \, p_t(x) \, dx & = \int f(x) \frac{\partial p_t(x)}{\partial t} dx
+\int f(x) \frac{\partial p_t(x)}{\partial t} dx & = \mathbb{E}\left[ \nabla f(X_t)^\top \left[ \frac{dX_t}{dt} \right] \right] \\
+& = \mathbb{E}\left[ \nabla f(X_t)^\top v_t(X_t) \right]\\
+& = \int \nabla f(x)^\top v_t(x) \, p_t(x) \, dx 
 \end{align*}
+$$
+
+We use integration by parts in $x$ technique. Suppose we need to find the following where $f(x)$ and $g(x)$ are functions of $x$:
+
+$$
+\begin{align*}
+\frac{d}{dx} \int_{-\infty}^{\infty} f(x)\, g(x) dx & = \int_{-\infty}^{\infty} \frac{d}{dx} \left( f(x)\, g(x) \right) dx \\
+& =  \int_{-\infty}^{\infty} f'(x) g(x) \, dx + \int_{-\infty}^{\infty} f(x) \, g'(x) \, dx \\
+f(x) g(x) \big|_{-\infty}^{\infty} & = \int f'(x) g(x) \, dx + \int f(x) \, g'(x) \, dx \\
+\\
+\int_{-\infty}^{\infty} f'(x) g(x) \, dx & = f(x) g(x) \big|_{-\infty}^{\infty} -\int_{-\infty}^{\infty} f(x) \, g'(x) \, dx \\
+\end{align*}
+$$
+
+Assume $\lim_{\|x\| \to \infty} f(x)g(x) = 0$ (boundary terms vanish), then
+
+$$
+\int f'(x) g(x) \, dx = -\int f(x) \, g'(x) \, dx
+$$
+
+We can do the same with the double derivatives as well:
+
+$$
+\begin{align*}
+\frac{d}{dx} \int f'(x)\, g(x) dx & = \int \frac{d}{dx} \left( f'(x)\, g(x) \right) dx \\
+f'(x) g(x) \big|_{-\infty}^{\infty} & =  \int f''(x) g(x) \, dx + \int f'(x) \, g'(x) \, dx \\
+\end{align*}
+$$
+
+Assume $\lim_{\|x\| \to \infty} f'(x)g(x) = 0$, then,
+
+$$
+\int f''(x) g(x) \, dx = - \int f'(x) \, g'(x) \, dx
+$$
+
+Similarly,
+
+$$
+\begin{align*}
+\frac{d}{dx} \int f(x)\, g'(x) dx & = \int \frac{d}{dx} \left( f(x)\, g'(x) \right) dx \\
+f(x) g'(x) \big|_{-\infty}^{\infty} & =  \int f'(x) g'(x) \, dx + \int f(x) \, g''(x) \, dx \\
+\end{align*}
+$$
+
+Assume $\lim_{\|x\| \to \infty} f(x)g'(x) = 0$, then,
+
+$$
+\int f'(x) g'(x) \, dx = - \int f(x) \, g''(x) \, dx
+$$
+
+On comparing this with the previous case, we see
+
+$$
+\int f''(x) g(x) \, dx = \int f(x) \, g''(x) \, dx
+$$
+
+In such cases, it doesn't matter if we take the derivative of the first function or the second function to compute the integration.
+
+Assume
+
+$$
+\lim_{\|x\| \to \infty} \nabla f(x)^\top \, v_t(x) p_t(x) = 0
+$$
+
+So we can apply the integration by parts technique to get
+
+$$
+\int \nabla f(x)^\top v_t(x) \, p_t(x) \, dx = - \int f(x) \nabla \cdot (v_t(x) \, p_t(x)) \, dx
+$$
+
+**Difference between grad and Div?**
+
+* Gradient: $\nabla f(x) \in \mathbb{R}^d$. Gradient acts on a scalar $f$.
+* Divergence
+
+$$
+\nabla \cdot g(x) = \sum_{i=1}^d \frac{\partial g_i(x)}{\partial x_i}
+$$
+
+for $g:\mathbb{R}^d \to \mathbb{R}^d$. Divergence acts on a vector field. The result from the divergence operator is a scalar.
+
+**How grad in LHS changes to Div in RHS?**
+
+<figure markdown="0" class="figure zoomable">
+<img src='./images/grad_to_div.png' alt="Gradient to Div"><figcaption>
+  <strong>Figure 2.</strong> How grad in LHS changes to Div in RHS
+  </figcaption>
+</figure>
+
+So, our equation becomes:
+
+$$
+\begin{align*}
+\int f(x) \frac{\partial p_t(x)}{\partial t} dx & = - \int f(x) \nabla \cdot (v_t(x) \, p_t(x)) \, dx 
+\end{align*}
+$$
+
+This is true for all $f$, then it should be if and only if
+
+$$
+\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) \hspace{1cm} \forall x
 $$
 
 Given the vector field $v_t$, this ODE tells us how the likelihood flows. We can solve this to find $p_t$. Here, $\nabla \cdot$ denotes the divergence operator, which measures how much the vector field is expanding or contracting at a point.

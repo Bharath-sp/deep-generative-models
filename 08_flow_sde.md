@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Flow with Diffusion
+title: Flow SDEs
 categories: [Generative AI]
 toc: true
 ---
@@ -9,7 +9,7 @@ toc: true
 {:toc}
 
 ## Problem Statement
-We want to analyze equation of this form:
+Now, we return to our original goal of understanding the equation with random perturbation:
 
 <a name="eq:eq1"></a>
 $$
@@ -22,7 +22,7 @@ Here
 * $v_k(X_k)$ has the same dimension as $X_k$.
 * $\sigma_k(X_k)$ can be a scalar or $d$-dimensional vector or $\mathbb{R}^{d \times d}$ matrix. Element-wise product is taken if $\sigma_k$ is a vector.
 
-If order of $s$, $o(s)$, is the same as the order of $s'$, and the velocity is the Stein score, then it is equivalent to SGD. It converges to the mode of the log-likelihood. Thus, if $o(s) = o(s')$, then it is not suitable for sampling. We need to have $o(s') > o(s)$, i.e., $s'$ should be of higher magnitude than $s$. One particular choice for $s'$ is $\sqrt{s}$. If $s$ is smaller (between 0 and 1), then $\sqrt{s}$ will be larger value than $s$.
+If  the noise perturbation is of same order as the signal, i.e., order of $s$, $o(s)$, is the same as the order of $s'$, and the velocity is the Stein score, then it is equivalent to SGD. It converges to the mode of the log-likelihood. Thus, if $o(s) = o(s')$, then it is not suitable for sampling. We need to have $o(s') > o(s)$, i.e., $s'$ should be of higher magnitude than $s$. One particular and a well-studied choice for $s'$ is $\sqrt{s}$, which is orders of magnitude higher in scale and hence is expected to disturb the convergence to modes. If $s$ is smaller (between 0 and 1), then $\sqrt{s}$ will be larger value than $s$.
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/particle_probability_flow_noise.png' alt="particle and probability flow example with random perturbation"><figcaption>
@@ -89,16 +89,21 @@ $$
 dX_t = v_t(X_t) \, dt + \sigma_t(X_t)\, dW_t \tag{3}
 $$
 
+where $v_t$ is the drift potential and $\sigma_t$ is the diffusion coefficient. Such equations are known as stochastic differential equation (SDE) as it involves a stochastic component. The stochastic process that is a solution to this SDE is known as Ito process.
+
 * If the velocity field $v_t=0$, the process $\{X_t\}$ will be a pure diffusion process.
 * If the diffusion coefficient $\sigma_t=0$, the process $\{X_t\}$ will be ODE flow.
 
-We are interested in the combination of these two. When we have these components, the process is known as Ito process.
+We are interested in the combination of these two.
 
-When $v_t(x) = \nabla \log p^*(x)$ and $\sigma_t(x) = \sqrt{2}$ (this is just for mathematical convenience, a value of 1 is also fine), then the process has a limiting distribution and it will be $p^*$. After large $T$, that is after reaching $p^*$, the particles will be still moving, but the distribution of particles will be exactly $p^*$ at all future time steps (stationary distribution). The Ito process $\{X_t\}$ corresponding to this choice is known as **Langevin diffusion**.
+The special case where $v_t(x) = \nabla_x \log p^*(x)$ and $\sigma_t(x) = \sqrt{2}$ (this is just for mathematical convenience, a value of 1 is also fine) is called **Langevin diffusion** and we are hopeful that the corresponding Ito process has a limiting distribution, and it will be $p^*$. After large $T$, that is after reaching $p^*$, the particles will be still moving, but the distribution of particles will be exactly $p^*$ at all future time steps (stationary distribution).
 
-Equation <a href="#eq:eq3">(3)</a> is not a ODE, it is a stochastic differential equation (SDE) as it involves a stochastic component.
+Analogous to ODE case, we need to restrict drift and diffusion terms so that this equation has a unique process as its solution. We assume the drift and diffusion functions are Lipschitz continuous for this sake.
 
 ## Fokker Planck Equation
+
+While the primal (particle) view is essential for generating samples, it is important to understand the dynamics of the corresponding marginals, $X_t \sim p_t$ because we wish to design SDEs such that $p_t \to p^*$.
+
 Fokker Plank Equation is analogous to continuity equation that tells us how likelihood of Ito processes evolve. We know that the expectation equation connects explicitly the random variable $X_t$ and $p_t(x)$:
 
 $$
@@ -273,92 +278,11 @@ $$
 
 **Simplification of the first term in RHS:**
 
-We use integration by parts in $x$ technique. Suppose we need to find the following where $f(x)$ and $g(x)$ are functions of $x$:
-
-$$
-\begin{align*}
-\frac{d}{dx} \int_{-\infty}^{\infty} f(x)\, g(x) dx & = \int_{-\infty}^{\infty} \frac{d}{dx} \left( f(x)\, g(x) \right) dx \\
-& =  \int_{-\infty}^{\infty} f'(x) g(x) \, dx + \int_{-\infty}^{\infty} f(x) \, g'(x) \, dx \\
-f(x) g(x) \big|_{-\infty}^{\infty} & = \int f'(x) g(x) \, dx + \int f(x) \, g'(x) \, dx \\
-\\
-\int_{-\infty}^{\infty} f'(x) g(x) \, dx & = f(x) g(x) \big|_{-\infty}^{\infty} -\int_{-\infty}^{\infty} f(x) \, g'(x) \, dx \\
-\end{align*}
-$$
-
-Assume $\lim_{\|x\| \to \infty} f(x)g(x) = 0$ (boundary terms vanish), then
-
-$$
-\int f'(x) g(x) \, dx = -\int f(x) \, g'(x) \, dx
-$$
-
-We can do the same with the double derivatives as well:
-
-$$
-\begin{align*}
-\frac{d}{dx} \int f'(x)\, g(x) dx & = \int \frac{d}{dx} \left( f'(x)\, g(x) \right) dx \\
-f'(x) g(x) \big|_{-\infty}^{\infty} & =  \int f''(x) g(x) \, dx + \int f'(x) \, g'(x) \, dx \\
-\end{align*}
-$$
-
-Assume $\lim_{\|x\| \to \infty} f'(x)g(x) = 0$, then,
-
-$$
-\int f''(x) g(x) \, dx = - \int f'(x) \, g'(x) \, dx
-$$
-
-Similarly,
-
-$$
-\begin{align*}
-\frac{d}{dx} \int f(x)\, g'(x) dx & = \int \frac{d}{dx} \left( f(x)\, g'(x) \right) dx \\
-f(x) g'(x) \big|_{-\infty}^{\infty} & =  \int f'(x) g'(x) \, dx + \int f(x) \, g''(x) \, dx \\
-\end{align*}
-$$
-
-Assume $\lim_{\|x\| \to \infty} f(x)g'(x) = 0$, then,
-
-$$
-\int f'(x) g'(x) \, dx = - \int f(x) \, g''(x) \, dx
-$$
-
-On comparing this with the previous case, we see
-
-$$
-\int f''(x) g(x) \, dx = \int f(x) \, g''(x) \, dx
-$$
-
-In such cases, it doesn't matter if we take the derivative of the first function or the second function to compute the integration.
-
-Assume
-
-$$
-\lim_{\|x\| \to \infty} \nabla f(x)^\top \, v_t(x) p_t(x) = 0
-$$
-
-So we can apply this property.
+We can apply the integration by parts technique to get
 
 $$
 \int \nabla f(x)^\top v_t(x) \, p_t(x) \, dx = - \int f(x) \nabla \cdot (v_t(x) \, p_t(x)) \, dx
 $$
-
-**Difference between grad and Div?**
-
-* Gradient: $\nabla f(x) \in \mathbb{R}^d$. Gradient acts on a scalar $f$.
-* Divergence
-
-$$
-\nabla \cdot g(x) = \sum_{i=1}^d \frac{\partial g_i(x)}{\partial x_i}
-$$
-
-for $g:\mathbb{R}^d \to \mathbb{R}^d$. Divergence acts on a vector field. The result from the divergence operator is a scalar.
-
-**How grad in LHS changes to Div in RHS?**
-
-<figure markdown="0" class="figure zoomable">
-<img src='./images/grad_to_div.png' alt="Gradient to Div"><figcaption>
-  <strong>Figure 2.</strong> How grad in LHS changes to Div in RHS
-  </figcaption>
-</figure>
 
 **Simplification of the second term in RHS:**
 
@@ -393,10 +317,10 @@ $$
 \int f(x) \, \frac{\partial p_t(x)}{\partial t} \, dx = - \int f(x) \nabla \cdot (v_t(x) \, p_t(x)) \, dx + \int f(x)\, \sum_{ij} \frac{\partial^2 (D_t(x)_{ij} \cdot p_t(x))}{\partial x_i \partial x_j} \, dx 
 $$
 
-This is true for all $f$, so on comparing the terms, we get
+This is true for all $f$, then it should be if and only if
 
 $$
-\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \sum_{ij} \frac{\partial^2 (D_t(x)_{ij} \cdot p_t(x))}{\partial x_i \partial x_j}
+\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \sum_{ij} \frac{\partial^2 (D_t(x)_{ij} \cdot p_t(x))}{\partial x_i \partial x_j}  \hspace{1cm} \forall x
 $$
 
 This is the general Fokker-Planck equation. If $\sigma_t(x)$ is a scalar, then $M_t(X_t) = \sigma_t^2 \nabla^2 f(X_t)$.
@@ -416,7 +340,7 @@ $$
 Here we have used the definition that the trace of Hessian of $f$ is the Laplacian of $f$, and also the integration by parts technique (assuming boundary terms vanish). On substituting this in equation <a href="#eq:eq6">(6)</a> and comparing terms, we get
 
 $$
-\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \frac{1}{2} \Delta (\sigma_t^2(x) p_t(x))
+\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \frac{1}{2} \Delta (\sigma_t^2(x) p_t(x)) \hspace{1cm} \forall x
 $$
 
 If $\sigma_t(x) = \sigma(t)$, i.e., it is independent of $X_t$ and is a function of only $t$, then
@@ -432,7 +356,7 @@ $$
 On substituting this in equation <a href="#eq:eq6">(6)</a> and comparing terms:
 
 $$
-\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \frac{\sigma_t^2}{2} \Delta p_t(x)
+\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \frac{\sigma_t^2}{2} \Delta p_t(x) \hspace{1cm} \forall x
 $$
 
-The Fokker-Planck equation that governs how likelihood evolves for Ito processes. In our previous section (flow ODE), the continuity equation just had the first term.
+The Fokker-Planck equation governs how likelihood evolves for Ito processes. In our previous section (flow ODE), the continuity equation just had the first term.

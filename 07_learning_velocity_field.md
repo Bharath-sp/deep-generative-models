@@ -14,15 +14,7 @@ Consider the case where there is no random perturbation.
 Suppose we start with $p_0$ at $t=0$ and we reach $p_1$ at $t=1$. We want $p_1$ to be our target distribution. We want to learn $v_t$ such that $p_1=p^*$ is achieved. In general, we are given only samples from $p^*$, so learning $v_t$ will be a learning problem. Here from the sampling aspect, we are assuming that $p^*$ is known, so finding an appropriate $v_t$ is an optimization problem.
 
 ## Optimization Problem
-Suppose $p_0$ is our initial distribution (fixed) and we know $p^*$ which is also fixed. If $p_0$ and $p^*$ are known, we can compute $v_t$ which takes us from $p_0$ to $p^*$.
-
-It is evident that there could be multiple solutions to this problem. There can be many velocity fields that can takes us from $p_0$ to $p^*$. Of all the possible velocities, we might be interested in:
-
-* Simple particle paths: straight line paths in the input space.
-* Simple likelihood paths: straight line paths in the likelihood space.
-* Least energy paths
-
-The particle flow ODE is:
+Suppose $p_0$ is our initial distribution (fixed) and we know $p^*$ which is also fixed. If $p_0$ and $p^*$ are known, we can compute $v_t$ which takes us from $p_0$ to $p^*$. The particle flow ODE is:
 
 $$
 \frac{dx_t}{dt} = v_t(x_t)
@@ -55,14 +47,26 @@ In RNNs, we usually have the same network $f$ (with same parameters). This archi
 
 Equations in <a href="#eq:eq1">(1)</a> are discrete unfolding of the particle flow ODE. The particle ODE (which is the continuous version) has these unfoldings for every $t$. We can think of this as similar to RNNs (with skip connection) but with continuous set of layers. Such RNNs are known as Neural ODEs.
 
-We learn a function $f_{\theta}(x_t,t)$ using a model (neural ODE NN + ODE solver) by imposing the condition that the output from the model should be distributed according to our target distribution $p^*$. So, our objective is to learn a parameter $\theta$ (out of many possible $\theta$s) such that $f_{\theta}(X_0) \sim p^*$. If $X_0$ follows a uniform distribution, then $f_{\theta}(X_0)$ is a RV which is some function of $X_0$. We want to choose $\theta$ such that the distribution of this RV is the same as $p^*$.
+We learn a function $f_{\theta}(x_t,t)$ using a model (neural ODE NN) by imposing the condition that the output from the model should be distributed according to our target distribution $p^*$. The solution
+
+$$
+X_1 = X_0 + \int_0^1 f_{\theta}(X_t,t) \, dt
+$$
+
+should be distributed as the target $p^*$. It is evident that there could be multiple solutions to this problem. There can be many velocity fields that can takes us from $p_0$ to $p^*$. There are multiple regularization criteria we can explore, we can look for:
+
+* Simple particle paths: straight line paths in the input space.
+* Simple likelihood paths: straight line paths in the likelihood space.
+* Least energy paths
+
+So, our objective is to learn a parameter $\theta$ (out of many possible $\theta$s) such that $X_1 \sim p^*$. If $X_0$ follows a uniform distribution, then $f_{\theta}(X_0, t)$ is a RV which is some function of $X_0$. We want to choose $\theta$ such that the distribution of this RV is the same as $p^*$.
 
 <div class="admonition tip">
   <p class="admonition-title">Note</p>
   <p>There can be many functions of a random variable having the same distribution. For example, if $X_0$ is Bernoulli distributed with $p=0.5$, then $1-X_0$ is also Bernoulli distributed with $p=0.5$, if $X_0$ is Gaussian, then $-X_0$ is also Gaussian.</p>
 </div>
 
-Therefore, there are many $\theta$s that satisfy our objective. So, we put some more conditions on $\theta$ to get a unique solution (i.e., in order to achieve simple paths).
+Therefore, there are many $\theta$s that satisfy our objective. So, we put some more conditions (regularizations) on $\theta$ to get a unique solution (i.e., looking in the space of simple paths, etc.).
 
 ## Two Paradigms of Sampling
 
