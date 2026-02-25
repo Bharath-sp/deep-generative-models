@@ -1,11 +1,9 @@
 ---
 layout: post
-title: Energy-Based Models
+title: Appendix
 categories: [Generative AI]
 toc: true
 ---
-
-We are given a set of images. That is, we are given a set of samples from some underlying distribution. How can we sample more images from this (unknown) underlying distribution?
 
 * TOC
 {:toc}
@@ -30,3 +28,26 @@ $$
 The $\text{exp}$-function ensures that we assign a probability greater than zero to any possible input. We use a negative sign in front of $f$ because we call $f_{\theta}$ to be the energy function: data points with high likelihood have a low energy, while data points with low likelihood have a high energy. $Z_{\theta}$ is our normalization term that ensures that the density integrates/sums to 1.
 
 Reference: [Taken from here](https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial8/Deep_Energy_Models.html)
+
+## Rate of Convergence
+Let $x_k$ be an iterative sequence converging to $x^*$. Define the error:
+
+$$
+e_k := \| x_k -x^* \|
+$$
+
+We describe convergence by how fast $e_k \to 0$ as $k \to \infty$.
+
+We say $e_k = O(g(k))$ if there exists a constant $C>0$ and $k_0$ such that
+
+$$
+e_k \leq C\, g(k), \hspace{1cm} \forall k \geq k_0
+$$
+
+This means the error decreases at most at the rate of $g(k)$ asymptotically. For example
+
+$$
+e_k = O\left(\frac{1}{k}\right) \implies e_k \leq \frac{C}{k} \hspace{1cm} \forall k \geq k_0
+$$
+
+That is, $O(g(k))$ means that the error decays no slower than $g(k)$. Or, the error shrinks proportionally to $g(k)$ asymptotically, up to a constant factor.

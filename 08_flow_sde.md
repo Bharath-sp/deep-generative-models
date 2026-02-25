@@ -22,7 +22,7 @@ Here
 * $v_k(X_k)$ has the same dimension as $X_k$.
 * $\sigma_k(X_k)$ can be a scalar or $d$-dimensional vector or $\mathbb{R}^{d \times d}$ matrix. Element-wise product is taken if $\sigma_k$ is a vector.
 
-If  the noise perturbation is of same order as the signal, i.e., order of $s$, $o(s)$, is the same as the order of $s'$, and the velocity is the Stein score, then it is equivalent to SGD. It converges to the mode of the log-likelihood. Thus, if $o(s) = o(s')$, then it is not suitable for sampling. We need to have $o(s') > o(s)$, i.e., $s'$ should be of higher magnitude than $s$. One particular and a well-studied choice for $s'$ is $\sqrt{s}$, which is orders of magnitude higher in scale and hence is expected to disturb the convergence to modes. If $s$ is smaller (between 0 and 1), then $\sqrt{s}$ will be larger value than $s$.
+If the noise perturbation is of same order as the signal, i.e., order of $s$, $o(s)$, is the same as the order of $s'$, and the velocity is the Stein score, then it is equivalent to SGD. It converges to the mode of the log-likelihood. Thus, if $o(s) = o(s')$, then it is not suitable for sampling. We need to have $o(s') > o(s)$, i.e., $s'$ should be of higher magnitude than $s$. One particular and a well-studied choice for $s'$ is $\sqrt{s}$, which is orders of magnitude higher in scale and hence is expected to disturb the convergence to modes. If $s$ is smaller (between 0 and 1), then $\sqrt{s}$ will be larger value than $s$.
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/particle_probability_flow_noise.png' alt="particle and probability flow example with random perturbation"><figcaption>
@@ -30,7 +30,7 @@ If  the noise perturbation is of same order as the signal, i.e., order of $s$, $
   </figcaption>
 </figure>
 
-When we start with the same $X_0$ the next time, the path will be different even though the velocity field is fixed. Therefore, particle distribution at every time step is random because of the randomness in particle initialization and randomness in its path.
+When we start with the same $X_0$ the next time, the path will be different even though the velocity field is fixed. Therefore, particle distribution at every time step is random because of the randomness in particle initialization, randomness in its path (because of the randomness in the previous $X_t$), and the random perturbation.
 
 Rewriting equation <a href="#eq:eq1">(1)</a> in terms of $t$ and $s=\Delta t$:
 
@@ -91,12 +91,13 @@ $$
 
 where $v_t$ is the drift potential and $\sigma_t$ is the diffusion coefficient. Such equations are known as stochastic differential equation (SDE) as it involves a stochastic component. The stochastic process that is a solution to this SDE is known as Ito process.
 
-* If the velocity field $v_t=0$, the process $\{X_t\}$ will be a pure diffusion process.
+* If the velocity field $v_t=0$, the process $\{X_t\}$ will be a pure diffusion process or also called as Brownian motion. Here the particles move completely random with no preferred direction. And as there is no drift (nothing to drive us to the goal), the resulting limiting distribution of the process will be uniform (e.g., the Weiner process). As the paths are completely random, the initial conditions are forgotten.
+
 * If the diffusion coefficient $\sigma_t=0$, the process $\{X_t\}$ will be ODE flow.
 
 We are interested in the combination of these two.
 
-The special case where $v_t(x) = \nabla_x \log p^*(x)$ and $\sigma_t(x) = \sqrt{2}$ (this is just for mathematical convenience, a value of 1 is also fine) is called **Langevin diffusion** and we are hopeful that the corresponding Ito process has a limiting distribution, and it will be $p^*$. After large $T$, that is after reaching $p^*$, the particles will be still moving, but the distribution of particles will be exactly $p^*$ at all future time steps (stationary distribution).
+The special case where $v_t(x) = \nabla_x \log p^*(x)$ and $\sigma_t(x) = \sqrt{2}$ (this is just for mathematical convenience, a value of 1 is also fine) is called **Langevin diffusion** and we are hopeful that the corresponding Ito process has a limiting distribution, and it will be $p^*$.
 
 Analogous to ODE case, we need to restrict drift and diffusion terms so that this equation has a unique process as its solution. We assume the drift and diffusion functions are Lipschitz continuous for this sake.
 
@@ -356,7 +357,11 @@ $$
 On substituting this in equation <a href="#eq:eq6">(6)</a> and comparing terms:
 
 $$
-\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) + \frac{\sigma_t^2}{2} \Delta p_t(x) \hspace{1cm} \forall x
+\begin{align*}
+\frac{\partial p_t(x)}{\partial t} & = -\nabla \cdot (v_t(x) \, p_t(x)) + \frac{\sigma_t^2}{2} \Delta p_t(x) \hspace{1cm} \forall x \\
+& = -\nabla \cdot (p_t(x) \, v_t(x)) + \frac{\sigma_t^2}{2} \nabla \cdot \nabla p_t \hspace{1cm} \forall x \\
+& = -\nabla \cdot \left( p_t\, v_t- \frac{\sigma_t^2}{2} \nabla p_t \right) \hspace{1cm} \forall x \\
+\end{align*}
 $$
 
 The Fokker-Planck equation governs how likelihood evolves for Ito processes. In our previous section (flow ODE), the continuity equation just had the first term.

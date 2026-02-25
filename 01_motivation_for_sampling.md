@@ -66,7 +66,7 @@ $$
 p_{\theta}(x) = \frac{e^{-f_{\theta}(x)}}{\int e^{-f_{\theta}(x)} dx} = \frac{e^{-f_{\theta}(x)}}{Z(\theta)}
 $$
 
-where $f_{\theta}(x)$ can be any neural network with any architecture (depending on the modality of $x$). It takes an $x$ and gives a real number. Raising it to the power of $e$ ensures that the result is non-negative. And normalizing it by a suitable constant makes $p_{\theta}(x)$ a valid probability distribution (a likelihood).
+where $f_{\theta}(x)$ can be any neural network with any architecture (depending on the modality of $x$) and $\theta$ are the parameters of the network. It takes an $x$ and gives a real number. Raising it to the power of $e$ ensures that the result is non-negative. And normalizing it by a suitable constant makes $p_{\theta}(x)$ a valid probability distribution (a likelihood).
 
 Such models for likelihood based on neural networks are called as **Energy-based** models. The neural network function $f_{\theta}(x)$ plays the role of energy in statistical physics interpretation. Electrons with high energy are less likely to be in lower orbits, and electrons with low energy are highly likely to be in lower orbits. In such sense, $f_{\theta}(x)$ can be interpreted as an energy function (that outputs energy for a given input).
 
