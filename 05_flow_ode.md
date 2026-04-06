@@ -334,7 +334,7 @@ for $g:\mathbb{R}^d \to \mathbb{R}^d$. Divergence acts on a vector field. The re
 **How grad in LHS changes to Div in RHS?**
 
 <figure markdown="0" class="figure zoomable">
-<img src='./images/grad_to_div.png' alt="Gradient to Div"><figcaption>
+<img src='./images/grad_to_div.png' alt="Gradient to Div" width=600><figcaption>
   <strong>Figure 2.</strong> How grad in LHS changes to Div in RHS
   </figcaption>
 </figure>

@@ -75,7 +75,10 @@ This in fact suggests that Langevin diffusion can also be viewed as a ODE flow p
 
 <a name="eq:eq3"></a>
 $$
-v_t \equiv \nabla \log p^* -  \nabla \log p_t \tag{3}
+\begin{align*}
+v_t & \equiv - \nabla f_t \\
+v_t & \equiv \nabla \log p^* -  \nabla \log p_t \tag{3}
+\end{align*}
 $$
 
 With this choice of $v_t$ in equation <a href="#eq:eq2">(2)</a>, the continuity equation becomes Fokker-Planck. So, the likelihood evolution in SDE diffusion, is same as the likelihood evolution in ODE flow but with an additional frictional drift.
@@ -139,6 +142,9 @@ We need to prove that the Langevin diffusion as defined by the SDE or equivalent
 Monotonic convergence: If we keep going down the sequence, we get closer and closer to a value $k$ (we won't move away), then we say that we the sequence converges monotonically to $k$. In Langevin diffusion, we even show that the likelihood $p_t$ converges monotonically to $p^*$.
 
 ## Convergence of Langevin Diffusion
+
+Assume $p^*$ is non-zero everywhere in its domain (it doesn't have disjoint regions).
+
 We use the Lyapunov stability method for directly proving that the limiting likelihood for Langevin diffusion is indeed $p^*$. For this, we consider a (Lyapunov) function $\mathcal{F}$ that can quantify the deviation between $p_t$ (a marginal in the diffusion process), and $p^*$.
 
 $$
@@ -194,21 +200,40 @@ $p_t$ is always $\geq 0$ and norm of any vector is also $\geq 0$, so the integra
   <p>Note here that we are not saying $\frac{d\mathcal{F}(t)}{dt}$ is increasing or decreasing, it just says the derivative is negative for all $t$. In the next article, we will explore how this derivative is changing with time.</p>
 </div>
 
-It is equal to 0 if and only if the integral is 0. Suppose $p_t$ is $> 0$, then
+It is equal to 0 if and only if the integral is 0.
 
 $$
 \begin{align*}
-\frac{d\mathcal{F}(t)}{dt} &= 0 \\
+\frac{d\mathcal{F}(t)}{dt} &= 0 \hspace{1cm} \forall x\\
 & \iff \| \nabla f_t \|^2 =0 \\
 & \iff \nabla f_t =\mathbf{0} \\
 & \iff \nabla \log p_t = \nabla \log p^* \\
+& \iff \int \nabla \log p_t = \int \nabla \log p^* + C \\
 & \iff \log p_t = \log p^* + C \\
 & \iff p_t = K p^* \\
 & \iff p_t = p^* \hspace{1cm} K \text{ should be 1} \\
 \end{align*}
 $$
 
-We are integrating both the sides with respect to $x$ in the 4th step. And $K$ cannot be anything other than 1, because $p_t$ and $p^*$ are likelihoods.
+The quantity $\nabla \log p_t(x)$ is defined only in the region where $p_t(x)$ is non-zero. If $p_t(x)=0$, then $\log p_t(x)$ is undefined, and its gradient is meaningless.
+
+So, the equality $\nabla \log p_t(x) = \nabla \log p^*(x)$ must be interpreted as:
+
+$$
+\nabla \log p_t(x) = \nabla \log p^*(x) \,\, \text{for } x \in \mathcal{S}
+$$
+
+where $\mathcal{S} := \text{supp}(p_t) \cap \text{supp}(p^*)$.
+
+Recall we assumed that $p^*$ is $> 0$ everywhere in its support. And $p_t$ should be strictly positive everywhere because we add Gaussian noise to the RV $X_t$ at each step. The third step says that the gradient equality holds for all $x$ in the support that is common between $p_t$ and $p^*$. So, $p_t$ must be having the same support as $p^*$.
+
+In general, from the third to the fifth step: we are saying when two scores are the same, their likelihoods are the same. This can be said only when
+
+* Both the densities are $>0$ on its support.
+* Both the densities are continuously differentiable on its support.
+* The support on which the equality holds is connected, i.e., no holes or disjoint regions inside of its support.
+
+And $K$ cannot be anything other than 1, because $p_t$ and $p^*$ are likelihoods.
 
 This proves that the function $\mathcal{F}(t)$ decreases strictly monotonically (it's derivative is always negative), and it's derivative is 0 only when $p_t$ reaches $p^*$. If $p_t$ is away from $p^*$, we will be keep getting closer and closer at every time step. Finally, we will reach $p^*$. Thus, Langevin diffusion is a good sampler.
 

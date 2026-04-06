@@ -121,7 +121,7 @@ $$
 \frac{1}{N} \sum_{i=1}^N \nabla f_{\theta}(x_i) = \mathbb{E}_{X \sim p_{\theta}(x)} \left[ \nabla f_{\theta}(x)  \right]
 $$
 
-Here we match our model distribution to the training data distribution. Note: we are not matching the mean of the model distribution $p_{\theta}(x)$ to the mean of training samples $x_i$'s. We are matching the mean of gradient of $f$, thereby matching the model to $p^*$.
+Here we match our model distribution to the training data distribution. Note: we are not matching the mean of the model distribution $p_{\theta}(x)$ to the mean of training samples $x_i$'s. We are matching the mean of gradient of $f$, thereby matching the likelihood to the target likelihood $p^*$.
 
 If $f$ is energy, then $\nabla f$ is rate of change of energy with displacement. It has energy divided by distance as unit. And we know that, force multiplied by distance calculates Work in physics, representing the energy transferred when a force causes displacement. Therefore, $\nabla f$ signifies some kind of force. Assume $x_i$'s to be particles. If we match the force applied on them according to our model to the force applied on them according to the evidence (given data), then the distribution of particle locations also match. That is, our model should be such that the forces at every point $(x,y)$ are matching in expectation with the actual forces that created these particles.
 

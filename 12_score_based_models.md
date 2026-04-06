@@ -18,6 +18,7 @@ As we know there are two ways to solve the generation problem. Given the knowled
 3. Input these samples to the energy-based model, and estimate the energy function using MLE, which will encode the mean and covariance inside it.
 4. Produce samples using LMC.
 5. Compare these samples with the pseudo-random number generated samples.
+6. As a next step, try the experiment with exponential distribution whose energy function is not strongly convex.
 
 Also observe how the quality of samples is changing with variance, dimension, step sizes, etc.
 
@@ -36,7 +37,15 @@ $$
 S_{\theta}(x) \equiv \nabla_x \log p_{\theta}(x)
 $$
 
-If we model the score function (Stein score) of the target distribution directly, then such models are called as score-based models. If Stein score are the same for two distributions, then the distributions are the same. So, it is equivalent to modelling the likelihood.
+If we model the score function (Stein score) of the target distribution directly, then such models are called as score-based models.
+
+<figure markdown="0" class="figure zoomable">
+<img src='./images/score_based_network.png' alt="" width=400><figcaption>
+  <strong>Figure 1.</strong> Score-based model diagram
+  </figcaption>
+</figure>
+
+If Stein score is the same for two distributions, then the distributions are the same, provided the densities are strictly positive and smooth on their support, with no holes or disjoint regions. Then, modelling score is equivalent to modelling the likelihood.
 
 <div class="admonition note">
   <p class="admonition-title">NOTE</p>
@@ -65,7 +74,7 @@ $$
 \min_{\theta} \int \| S_{\theta}(x) - S^*(x)  \|^2 \, p^*(x) \, dx \tag{1}
 $$
 
-This objective is known as **explicit or basic score matching**. From this, we need to get to a form which doesn't involve $S^*$; something similar to MLE in the likelihood case, which does not involve $p^*$ but only samples from it. Then, as the number of samples tends to infinity, this form should converge to the original problem.
+This loss function is known as **Fischer Divergence**, and score matching with this objective is known as **explicit or basic score matching**. From this, we need to get to a form which doesn't involve $S^*$; something similar to MLE in the likelihood case, which does not involve $p^*$ but only samples from it. Then, as the number of samples tends to infinity, this form should converge to the original problem.
 
 $$
 \begin{align*}
@@ -91,31 +100,55 @@ $$
 \end{align*}
 $$
 
-Substituting these back in our original problem <a href="#eq:eq1">(1)</a> gives us an approximate problem to solve:
+Substituting these back in our original problem <a href="#eq:eq1">(1)</a> and approximating them with sample-based estimates, we get the loss function:
 
+<a name="eq:eq2"></a>
 $$
 \begin{align*}
-\approx & \min_{\theta} \frac{1}{m} \sum_{i=1}^m \left( \| \nabla \log p_{\theta}(x_i) \|^2 - 2\Delta  \log p_{\theta}(x_i) \right) \\
+\approx & \min_{\theta} \frac{1}{m} \sum_{i=1}^m \left( \| S_{\theta}(x_i) \|^2 - 2 \, \nabla \cdot  S_{\theta}(x_i) \right) \tag{2}\\
+= & \min_{\theta} \frac{1}{m} \sum_{i=1}^m \left( \| \nabla \log p_{\theta}(x_i) \|^2 - 2\Delta  \log p_{\theta}(x_i) \right) \\
 = & \min_{\theta} \frac{1}{m} \sum_{i=1}^m \sum_{j=1}^n \left[ \left(\frac{\partial \log p_{\theta} (x_i)}{\partial x_j}\right)^2 - 2 \frac{\partial^2 \log p_{\theta}(x_i)}{\partial x_j^2} \right]
 \end{align*}
 $$
 
 where $m$ is the number of samples and $n$ is the dimension of the data $x$. As the number of samples tends to infinity, this problem converges to the original problem in <a href="#eq:eq1">(1)</a>. This objective is known as **implicit score matching**.
 
+Once we solve this, we get the score function $S_{\theta}(x)$, which can then be used to do Langevin sampling to generate new samples.
+
+<div class="admonition note">
+  <p class="admonition-title">NOTE</p>
+  <p>Note that in score-based modelling, we model $S_{\theta}$ where $\theta$ here denote the parameters of the score-based neural network. The first equation above is in terms of the model output, and all other equations are just expansions of it. Don't get confused with $\theta$ in $p_{\theta}$.</p>
+</div>
+
+**Approaches for generative modelling:**
+
+We can do:
+
+* Energy-based modelling + Langevin sampling. Here there is an additional complication: we need samples from the model $p_{\theta}$ to compute the gradient $\nabla f_{\theta}(x)$. So, during training as well, we need to use Langevin sampling. The gradient doesn't need to be exact; so we can usually take one or two steps in LMC to generate samples to compute the gradient while training.
+
+* Score-based modelling + Langevin sampling. Here we don't need Langevin sampling while training.
+
 ## Computational Cost
 Let
 
 $$
-S_{\theta}(x) = \nabla_x \log p_{\theta}(x) = \begin{bmatrix} \frac{\partial \log p_{\theta}(x)}{\partial x_1} \\ \frac{\partial \log p_{\theta}(x)}{\partial x_2}  \\ \vdots \\ \frac{\partial \log p_{\theta}(x)}{\partial x_n} \end{bmatrix} \in \mathbb{R}^n
+S_{\theta}(x) = \nabla_x \log p_{\theta}(x) = \begin{bmatrix} S_1(x) \\ S_2(x)  \\ \vdots \\ S_n(x) \end{bmatrix} = \begin{bmatrix} \frac{\partial \log p_{\theta}(x)}{\partial x_1} \\ \frac{\partial \log p_{\theta}(x)}{\partial x_2}  \\ \vdots \\ \frac{\partial \log p_{\theta}(x)}{\partial x_n} \end{bmatrix} \in \mathbb{R}^n
 $$
 
-be the score network output for a given $x$. The Laplacian of $\log p_{\theta}(x)$ is:
+be the score network output for a given $x \in \mathbb{R}^n$. Here each component $S_j(x)$ is a function of $n$ variables. Then, we need to compute the objective:
+
+$$
+\frac{1}{m} \sum_{i=1}^m \left( \| S_{\theta}(x_i) \|^2 - 2 \, \nabla \cdot  S_{\theta}(x_i) \right)
+$$
+
+* For a given data point $x$, the computational cost for the first term is $O(n)$; we need to square $n$ terms and add them.
+* The second term is the Laplacian of $\log p_{\theta}(x)$:
 
 $$
 \Delta \log p_{\theta}(x) = \nabla \cdot S_{\theta}(x) = \sum_{j=1}^n \frac{\partial S_{\theta,j}(x)}{\partial x_j} = \sum_{j=1}^n \frac{\partial^2 \log p_{\theta}(x_i)}{\partial x_j^2}
 $$
 
-So computationally, this is the trace of the Jacobian of the score network with respect to the input. The Jacobian of the score function or the Hessian of the log likelihood is:
+So computationally, this is the trace of the Jacobian of the score network output. The Jacobian of the score function or the Hessian of the log likelihood function is:
 
 $$
 J(x)=
@@ -156,6 +189,13 @@ $$
 
 This is simply the gradient of the scalar function $S_1(x)$ with respect to $x$.
 
-In Automatic differentiation, if we take a scalar output and call backward(), we obtain its gradient with respect to all inputs $x_1, \dots, x_n$ in one pass. So, each row of the Jacobian costs one backward pass. So, to compute $n$ rows, that is, the full Jacobian, we need $n$ backward pass. Hence, the full Jacobian cost is of the order $O(n)$ for a given data point $x$.
+In Automatic differentiation, if we take a scalar output and call backward(), we obtain its gradient with respect to all inputs $x_1, \dots, x_n$ in one pass. So, it requires order $O(n)$ computations. Each row of the Jacobian costs one backward pass with $O(n)$ computations. So, to compute $n$ rows, we need $n$ backward passes; the full Jacobian requires $O(n^2)$ computations for a given data point $x$.
 
-But we need only the trace of the Jacobian, but since backprop computes the whole vector (each row of $J$) with a backward pass, we will be computing the whole vector first and extracting the required component from it. Thus, the cost of Laplacian will also be $O(n)$ for a given data point $x$.
+But we need only the trace of the Jacobian, but since backprop computes the whole vector (each row of $J$) with one backward pass, we will be computing the whole vector first and extracting the required component from it. Thus, the computational cost for the second term is $O(n^2)$ for a given data point $x$.
+
+<div class="admonition note">
+  <p class="admonition-title">NOTE</p>
+  <p>Suppose we model the log-likelihood function instead, that is, our network output is $\log p_{\theta}(x)$ which is a scalar. Even in this case, we first need to compute the gradient $\nabla_x \log p_{\theta}(x)$, which will be a vector of size $n$. Then, we need to compute the gradient of the first component, which is of order $O(n)$. We repeat this for $n$ rows, so the total computations is $O(n^2)$ to obtain the Hessian matrix.</p>
+</div>
+
+The computation of order $O(n^2)$ is not feasible for high-dimensional data. So, the score-based modelling objective function <a href="#eq:eq2">(2)</a> has practical issues; its computation is not feasible for modern-day data sets.

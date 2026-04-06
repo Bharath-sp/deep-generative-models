@@ -476,29 +476,23 @@ $$
 g(s) \approx C_1 \,  \text{exp} \left( -\frac{2ks}{d} \right) + C_2 \, \sqrt{s}
 $$
 
-With this, we get the optimal step size as a function of $k$, which is of order $O\left( \frac{1}{\sqrt{k}} \right)$. The error will be also of order $O\left( \frac{1}{\sqrt{k}} \right)$. So, the effective rate of convergence is $O\left( \frac{1}{\sqrt{k}} \right)$. This is a very slow convergence rate.
+On differentiating this and setting it to 0 gives us $s^*$ which is of the order $O\left( \frac{\log k}{k}\right)$. Then,
 
-If we were doing $k=100$ iterations, then the error will be $0.1$. On increasing it by 100 folds, say $k=10,000$, the error will be $0.01$. The error is decreased only by 10 folds.
+$$
+g(s^*) = C_1 \text{exp}\left( -k \cdot \frac{\log k}{k} + C_2 \sqrt{\frac{\log k}{k}}\right) = C_1 \frac{1}{k} + C_2 \frac{\sqrt{\log k}}{\sqrt{k}}
+$$
+
+The first term is at least $O(\frac{1}{k})$, and the second term is at least $O\left( \frac{1}{\sqrt{k}} \right)$. Hence, the total cannot be smaller than $O\left( \frac{1}{\sqrt{k}} \right)$. Thus, the error will decay at the rate of $O\left( \frac{1}{\sqrt{k}} \right)$, which is the effective rate of convergence for LMC in general.
+
+Regardless of the initialization, LMC always converges to $p^*$ as $k \to \infty$. But in practice, we can't take infinite steps. At any $k$, the gap between $p_t$ and $p^*$ will be of order $\frac{1}{\sqrt{k}}$. This is a very slow convergence rate.
+
+At $k=100$ iterations, say the gap between $p_t$ and $p^*$ is $0.1$. On increasing it by 100 folds, i.e., at $k=10,000$, the error will be $0.01$. The error is decreased only by 10 folds.
 
 To increase the rate of convergence, we can do the momentum trick; we add momentum to the LMC algorithm. This accelerated version of LMC is called as **underdamped Langevin sampling**. This is like rolling a ball down the hill compared to sliding the ball. Rolling will have additional momentum because of friction; thus the ball will go faster. By under-damped version of LMC, we can improve the convergence rate from $O\left( \frac{1}{\sqrt{k}} \right)$ to $O\left( \frac{1}{k} \right)$.
 
-## Need to Check
-Differentiating $g$ and setting it to 0:
+## Tips on Initial Distribution
+* Suppose we start with $x_0$ from an initial distribution $p_0$. We carry out LMC and produce $x_k$. Repeat this with random $x_0$ from $p_0$. In the LMC process, because of the noise we add at each step, $p_0$ will be completely converted to $p^*$. This guarantee is coming from the Langevin dynamics and the property of the pseudo-random number generator. But the sample produced $x_k$ may still have features of $x_0$. This is because the path taken by the sample is still a function of $x_0$, and we are only running for finite steps. At each step in the path, we add noise from a pseudo-random number generator, which is also a piece of code. Thus, the $x_k$ will be a deterministic function of $x_0$.
 
-$$
-\begin{align*}
-C_1 \,  \text{exp} \left( -\frac{2ks^*}{d} \right) \cdot \left( -\frac{2k}{d} \right) + C_2 \cdot \frac{1}{2\sqrt{s^*}}  & = 0 \\
-\text{exp} \left( -\frac{2ks^*}{d} \right) \cdot \left( -\frac{2k}{d} \right) & = -\frac{C_2}{C_1 \cdot 2\sqrt{s^*}} \\
-\sqrt{s^*} \, \text{exp} \left( -\frac{2ks^*}{d} \right) & = \frac{C_2 d}{4k C_1 } \\
-\log \sqrt{s^*} -\frac{2ks^*}{d} & = \log \left( \frac{C_2 d}{4k C_1} \right) \\
-\frac{d \, \log \sqrt{s^*} -2ks^*}{d} & = \log \left( \frac{C_2 d}{4k C_1} \right) \\
-\frac{2ks^*}{d} & = \log \left( \frac{4k C_1 \sqrt{s} }{C_2 d} \right) \\
-s^* & = \frac{d}{2k}\log \left( \frac{4k C_1 \sqrt{s} }{C_2 d} \right) \\
-\end{align*}
-$$
+* Now, suppose we fix $x_0$. Two LMC runs with the same initial sample $x_0$ may give different samples as $k$ increases. With this $x_0$, say we run the LMC $m$ times with large $k$ in each episode. Then we get $m$ samples, these $m$ samples won't be distributed as $p^*$. These samples will also have features of $x_0$.
 
-Then
-
-$$
-g(s^*) = C_1 \frac{C_2 d}{4k C_1 \sqrt{s} } + C_2 \frac{d}{2k}\log \left( \frac{2k C_1 }{C_2 d} \right)
-$$
+So to avoid having features of the initial point in our sample, we always start with **random initialization point** $x_0$ from any **pure noise** distribution. The initial distribution can be Gaussian as it is easy to sample from it.
