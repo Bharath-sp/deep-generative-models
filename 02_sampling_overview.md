@@ -59,7 +59,7 @@ This idea of approximating the model by a proxy distribution (for e.g., GMM) is 
 ### Rejection Sampling
 In Rejection sampling, we are generalizing the method we used to sample a Bernoulli or Multinoulli RV to any general distribution $p_{\theta}(x)$.
 
-Say we have oracle access to $p_{\theta}(x)$, that is, we have a piece code that takes $x$ as input and gives the likelihood $p_{\theta}(x)$ for the provided $x$. Using this and a uniform sampler, can we come up with a sampler that samples from $p_{\theta}(x)$?
+Say we have oracle access to $p_{\theta}(x)$, that is, we have a piece of code that takes $x$ as input and gives the likelihood $p_{\theta}(x)$ for the provided $x$. Using this and a uniform sampler, can we come up with a sampler that samples from $p_{\theta}(x)$?
 
 Assume that the random variable $X$ which is distributed as $p_{\theta}(x)$ lies between 0 and 1.
 
@@ -91,6 +91,4 @@ Suppose $p_{\theta}(x)$ is an un-normalized density. Say $p_{\theta}(x)=0.6$. An
   p_{\theta}(x) = \frac{e^{-f_\theta(x)}}{Z(\theta)}
   $$
 
-  Given the parameters $\theta$, we may sometime only know the numerator, and it may be difficult to compute the denominator. We typically won't have a closed form expression for $Z$. So, in most of the cases, the likelihood is available only up to a normalization constant.
-
-  Therefore, any sampling algorithm should not use $Z$.
+  Given the parameters $\theta$, we may sometime only know the numerator, and it may be difficult to compute the denominator. We typically won't have a closed form expression for $Z$. So, in most of the cases, the likelihood is available only up to a normalization constant. Therefore, any sampling algorithm should not use $Z$.

@@ -28,7 +28,7 @@ X_{k+1} & := X_k + s \cdot v_k(X_k) \\
 \end{align*}
 $$
 
-This equation is similar to the gradient ascent if $v_k$ is the gradient of the log-likelihood. For the ease of understanding, let's assume the step size $s$ to be infinitesimally small. This way we don't have to deal with choosing the right step size, and focus only on the gradient term. Thus, we analyze the corresponding continuous time equation: when $s$ tends to 0, we have the ODE:
+For the ease of understanding, let's assume the step size $s$ to be infinitesimally small. This way we don't have to deal with choosing the right step size, and focus only on the gradient term. As $s$ tends to 0, this leads us to the form of an ordinary differential equation (ODE) which is a continuous time equation:
 
 <a name="eq:eq2"></a>
 $$
@@ -37,16 +37,18 @@ $$
 
 where we have changed the discrete step $k$ to a continuous one $t$. Here $X_t$ is a function of $t$, explicitly it is $X(t)$. The step size $s$ actually represents a small displacement (the change in time). The LHS measures how the random variable $X$ changes for a small change in time.
 
-Equation <a href="#eq:eq2">(2)</a> is a first-order ordinary differential equation (ODE). Note this is a differential equation on random variables. On writing the equation using the values of random variables:
+Equation <a href="#eq:eq2">(2)</a> is a first-order ODE. Note this is a differential equation on random variables. On writing the equation using the values of random variables:
 
 <a name="eq:eq3"></a>
 $$
 \frac{dx_t}{dt} =  v_t(x_t) \tag{3}
 $$
 
-Equation <a href="#eq:eq3">(3)</a> is called the primal view or particle view.
+Equation <a href="#eq:eq3">(3)</a> is called the primal view or particle view, where $x_t$ is the value of the random variable $X_t$.
 
-When solved, this equation tells us how $x_0$ evolves with time, that is, the flow of the particle $x_0$, where $x_t$'s are the positions of the particle at time $t$. Thus, these are also called as flow ODEs, and $v_t$ is the velocity field.
+When solved, this equation tells us how $x_0$ evolves with time, that is, the flow of a particle which started at $x_0$, and $x_t$'s are the positions of the particle at time $t$. Thus, these are also called as flow ODEs, and $v_t$ is the velocity field.
+
+We can design or learn velocity fields (or flow) that takes us from the proposal distribution to the target distribution. This is what flow-based generation methods do.
 
 ## Examples of ODE
 
@@ -125,7 +127,7 @@ Here $x_0$ should not be 0. And when $t=\frac{1}{x_0}$ or close to this, the fun
 ### Choice of $v(x)$
 The above two examples highlighted the need for insisting conditions on the velocity field, $v_t$, for the solution to uniquely exist for the ODE. In particular, if we assume $v_t$ is Lipschitz continuous (i.e., whenever $x$ changes, $v$ doesn't change too much), then we can guarantee that the ODE is uniquely solvable, defining a valid Markov process.
 
-* For the function $v(x)=x$ or $v(x)=1000x, \sqrt{x}$: for a change in $x$, the $v(x)$ doesn't change an order of magnitude higher. So, these are good functions. So, for the flow ODEs to have a solution, we should choose these kinds of functions for velocity.
+* For the function $v(x)=x$ or $v(x)=1000x$ or $\sqrt{x}$: for a change in $x$, the $v(x)$ doesn't change an order of magnitude higher. So, these are good functions. So, for the flow ODEs to have a solution, we should choose these kinds of functions for velocity.
 
 * For the function $v(x)=x^2$: for a change in $x$, the $v(x)$ changes an order of magnitude higher. So, these are bad functions.
 
@@ -137,13 +139,13 @@ The goal in neural ODE is to learn the vector field $v_{\theta}$ by adjusting th
 
 <div class="admonition tip">
   <p class="admonition-title">Note</p>
-  <p>Our goal is to parameterize $v_t$ by a neural ODE, and we want to find the parameters of that NN such that the distribution $p_t$ should match the data distribution $p_{data}$ as $t$ goes to $\infty$.</p>
+  <p>Our goal is to parameterize $v_t$ by a neural ODE, and we want to find the parameters of that NN such that the learned velocity field takes us from $p_0$ to $p^*$ in finite time.</p>
 </div>
 
 The training of neural network involves optimizing the parameters $\theta$ to minimize a loss function that measures how well the final distribution matches the data distribution. 
 
 ## Probability Flow ODE
-Our primary objective is to transport a simple base distribution $p_0$ (like Gaussian) to a complex data distribution $p_{data}$ using the flow induced by the learned vector field $v_{\theta}(x_t,t)$. But what is the objective function to optimize the parameters $\theta$ of the neural network representing the vector field? The criteria is that the flow induced by $v_{\theta}$ should satisfy the following continuity equation:
+Our primary objective is to transport a simple base distribution $p_0$ (like Gaussian) to a complex data distribution $p^*$ using the flow induced by the learned vector field $v_{\theta}(x_t,t)$. But what is the objective function to optimize the parameters $\theta$ of the neural network representing the vector field? The criteria is that the flow induced by $v_{\theta}$ should satisfy the following continuity equation:
 
 <a name="eq:eq4"></a>
 $$
@@ -198,14 +200,16 @@ $$
 
 NOTE: If we restrict to probability densities, linearity holds for convex combinations $(a,b \ge 0, a+b=1)$. Full linearity holds when $p$ is viewed as a signed measure.
 
-Equation <a href="#eq:eq5">(5)</a> gives us explicit relationship between the random variable (in terms of the expected value) and its likelihood, but it is not characterizing the likelihood $p_t$. Our objective is that, from random variables, we need to know something about its likelihood. Expectation of a random variable doesn't say much about its likelihood in the sense that we could have different likelihoods with the same mean. But if we know all the moments of the random variable, we can uniquely define its likelihood. Two different likelihoods cannot have all the moments same. So, this is used as a way of characterizing likelihoods in terms of random variables. The moments of a random variable are just functions of $X$, $f(X)$. Thus, we look at the expectation of $f(X)$ for all $f$. At time $t$, it will be:
+Equation <a href="#eq:eq5">(5)</a> gives us explicit relationship between the random variable (in terms of the expected value) and its likelihood, but it is not characterizing the likelihood $p_t$.
+
+Our objective is that, from random variables, we need to know something about its likelihood. Expectation of a random variable doesn't say much about its likelihood in the sense that we could have different likelihoods with the same mean. But if we know all the moments of the random variable, we can uniquely define its likelihood. Two different likelihoods cannot have all the moments same. So, this is used as a way of characterizing likelihoods in terms of random variables. The moments of a random variable are just functions of $X$, $f(X)$. Thus, we look at the expectation of $f(X)$ for all $f$. At time $t$, it will be:
 
 <a name="eq:eq6"></a>
 $$
-\mathbb{E}_{X_t \sim p_t} [f(X_t)] = \int f(x) p_t(x) dx \hspace{1cm} \forall f  \tag{6}
+\mathbb{E}_{X_t \sim p_t} [f(X_t)] = \int f(x) \, p_t(x) dx \hspace{1cm} \forall f  \tag{6}
 $$
 
-For all $f$, if $\mathbb{E}[f(X)]$ is the same for two distributions $p$ and $q$, then they both are the same.
+integrated over all values $x$ that the random variable $X_t$ can take. For all $f$, if $\mathbb{E}[f(X)]$ is the same for two distributions $p$ and $q$, then they both are the same.
 
 But the only information that is available to us is the rate of change of the position of the particle $X_t$, $\frac{dX_t}{dt}$. If we know the rate of change of $f(X_t)$, that is $\frac{df(X_t)}{dt}$, then we can use equation <a href="#eq:eq6">(6)</a> to know the rate of change of $p_t$, $\frac{\partial p_t}{\partial t}$ ($p$ is a function of both $x$ and $t$).
 
@@ -246,7 +250,7 @@ On substituting this in equation <a href="#eq:eq7">(7)</a>:
 
 $$
 \begin{align*}
-\int f(x) \frac{\partial p_t(x)}{\partial t} dx & = \mathbb{E}\left[ \nabla f(X_t)^\top \left[ \frac{dX_t}{dt} \right] \right] \\
+\mathbb{E}\left[\frac{d}{dt} f(X_t)\right] & = \mathbb{E}\left[ \nabla f(X_t)^\top \left[ \frac{dX_t}{dt} \right] \right] \\
 & = \mathbb{E}\left[ \nabla f(X_t)^\top v_t(X_t) \right]\\
 & = \int \nabla f(x)^\top v_t(x) \, p_t(x) \, dx 
 \end{align*}
@@ -320,9 +324,12 @@ $$
 \int \nabla f(x)^\top v_t(x) \, p_t(x) \, dx = - \int f(x) \nabla \cdot (v_t(x) \, p_t(x)) \, dx
 $$
 
+The gradient is with respect to $x$ and the divergence is also with respect to $x$.
+
 **Difference between grad and Div?**
 
-* Gradient: $\nabla f(x) \in \mathbb{R}^d$. Gradient acts on a scalar $f$.
+* Gradient: $\nabla f(x)$. Gradient acts on a scalar function $f:\mathbb{R}^d \to \mathbb{R}$. The result from the gradient operator is a vector $\mathbb{R}^d$.
+
 * Divergence
 
 $$
@@ -353,4 +360,4 @@ $$
 \frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (v_t(x) \, p_t(x)) \hspace{1cm} \forall x
 $$
 
-Given the vector field $v_t$, this ODE tells us how the likelihood flows. We can solve this to find $p_t$. Here, $\nabla \cdot$ denotes the divergence operator, which measures how much the vector field is expanding or contracting at a point.
+Given the vector field $v_t$, this continuity equation tells us how the likelihood flows. We can solve this to find $p_t$. Here, $\nabla \cdot$ denotes the divergence operator, which measures how much the vector field is expanding or contracting at a point.

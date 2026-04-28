@@ -31,7 +31,7 @@ $$
 \end{equation*}
 $$
 
-where $r$ and $s$ can be any function.
+where $r$ and $s$ can be any function. Note the terms can also be with $(p(x) - \pi_1(x))$ and $(p^*(y) - \pi_2(y))$.
 
 * The term $\max_r \int r(x) (\pi_1(x) - p(x)) \, dx $ is an equivalent way of saying $\pi_1 =  p(x)$.
 
@@ -104,7 +104,7 @@ Let's focus on the term $\min_{\pi \geq 0} \left[ \int \int \left( c(x,y) + r(x)
 
 At any $(x,y)$, we must have the density $\pi(x,y) \geq 0$, then
 
-* When $c(x,y) + r(x) + s(y) \geq 0$, then we can make $\pi(x,y)=0$ for that $(x,y)$, then the minimum value of the term will be 0.
+* When $c(x,y) + r(x) + s(y) \geq 0$, then we can make $\pi(x,y)=0$ for that $(x,y)$, then the minimum value we can achieve is 0.
 * When $c(x,y) + r(x) + s(y) < 0$, then we can blow $\pi(x,y)$ to a large value which gives us a minimum value of $-\infty$.
 
 $$
@@ -113,13 +113,19 @@ $$
 \end{cases}
 $$
 
-But we are looking for a maximum value with respect to $r,s$. Then, we can restrict our search in the space of
+But we are looking for a maximum value with respect to $r,s$. Then, we can restrict our search space to
 
 $$
 c(x,y) + r(x) + s(y) \geq 0 \,\, \forall (x,y)
 $$
 
-When this condition is satisfied, the value of the term $\min_{\pi \geq 0} \left[ \int \int \left( c(x,y) + r(x) + s(y) \right) \cdot \pi(x,y) \, dx \, dy \right]$ will be 0 by making $\pi(x,y)=0$ for all $(x,y)$. Then, the terms in the objective can be brought down to the constraints and rewritten as:
+For a given $(x,y)$:
+
+* When $c(x,y) + r(x) + s(y) > 0$, the minimum value we can achieve for $\min_{\pi \geq 0} \left[ \int \int \left( c(x,y) + r(x) + s(y) \right) \cdot \pi(x,y) \, dx \, dy \right]$ is 0, by making $\pi(x,y)=0$ for that $(x,y)$.
+
+* When $c(x,y) + r(x) + s(y) = 0$, the minimum value we can achieve for the objective is 0 because the term $c(x,y) + r(x) + s(y)$ is itself 0. But note that, only for these $(x,y)$, we can have probability mass $\pi(x,y) > 0$.
+
+In either case, the value of the term is 0, so the term in the objective can be brought down to the constraints and rewritten as:
 
 $$
 \begin{align*}
@@ -146,18 +152,12 @@ If $c$ is continuous, then the optimal transport problem is the same as:
 $$
 \begin{align*}
 & \max_{r,s \, \in \, \mathcal{C}(\mathcal{X})} \left[ \int r(x)\, p(x) \, dx + \int s(y)\, p^*(y) \, dy \right] \\
-& \hspace{0.5cm} \text{s.t.  } r(x) + s(y) \leq  c(x,y) \,\, \forall x,y \in \mathcal{X}
-\end{align*}
-$$
-
-where $\mathcal{X}$ denotes the data space and $\mathcal{C}(\mathcal{X})$ is the set of all possible functions in the data space. The objective can also be written as:
-
-$$
-\begin{align*}
 & \max_{r,s \, \in \, \mathcal{C}(\mathcal{X})}  \hspace{0.5cm} \mathbb{E}_{X \sim p}[r(X)] + \mathbb{E}_{Y \sim p^*}[s(Y)] \\
 & \hspace{0.5cm} \text{s.t.  } r(x) + s(y) \leq  c(x,y) \,\, \forall x,y \in \mathcal{X}
 \end{align*}
 $$
+
+where $\mathcal{X}$ denotes the data space and $\mathcal{C}(\mathcal{X})$ is the set of all possible functions in the data space.
 
 
 

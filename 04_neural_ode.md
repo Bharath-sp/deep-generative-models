@@ -19,7 +19,7 @@ $$
 
 This equation tells us how a state $x$ changes over an infinitesimal slice of time $t$. Solving this ODE or integrating the ODE means "finding the function $x(t)$ whose derivative satisfies the equation". It involves reversing the process of differentiation, moving from an equation describing a rate of change (derivatives) to a function that defines the actual value of a quantity.
 
-In the world of physics, think of it like $x$ the displacement, $t$ time step, and $f$ is the velocity. We know displacement = velocity x time. The rate of change of position over time is the velocity. Suppose let the function be $f(x(t), t) = x(t)-t$. Then, the equation is
+In the world of physics, think of it like $dx$ the displacement, $dt$ is a small change in time, and $f$ is the velocity. We know displacement = velocity x time. The rate of change of position over time is the velocity. Suppose the function be $f(x(t), t) = x(t)-t$. Then, the equation is
 
 $$
 \frac{dx}{dt} = x(t)- t
@@ -33,7 +33,7 @@ Direction field (or slope field) is a graphical representation, used to visualiz
   </figcaption>
 </figure>
 
-The arrows are the velocities for each point $x$ for different time steps (say $t=1,2,\dots$). Given these velocities, we need to find the particle positions (trajectory) across time. For any given condition, we can get the solution curve for this ODE. The trajectory of the particle should be tangent to these arrows at every point.
+The arrows are the velocities for each point $x$ for different time steps (say $t=1,2,\dots$). Given these velocities, we need to find the particle positions (trajectory) across time. For any given initial condition, we can get the solution curve for this ODE. The trajectory of the particle should be tangent to these arrows at every point.
 
 ## Numerical ODE Solver
 The Forward Euler method is the simplest numerical way to find an approximate solution to the ODE above. If we want to find the next state $x(t + \Delta t)$, we approximate it by taking the current state and adding the rate of change multiplied by the step size $\Delta t$:
@@ -44,10 +44,10 @@ $$
 
 Assume $\Delta t=1$ and the initial condition $x(0)=0.5$. Then,
 
-* $x(1) = x(0) + x(0)-0 = 1$
-* $x(2) = x(1) + x(1)-1 = 1$
-* $x(3) = x(2) + x(2)-2 = 0$
-* $x(4) = x(3) + x(3)-3 = -3$
+* $x(1) = x(0) + f(x(0), 0) = x(0) + x(0)-0 = 1$
+* $x(2) = x(1) + f(x(1), 1) = x(1) + x(1)-1 = 1$
+* $x(3) = x(2) + f(x(2), 2) = x(2) + x(2)-2 = 0$
+* $x(4) = x(3) + f(x(3), 3) = x(3) + x(3)-3 = -3$
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/particle_path.png' alt="Solution to the given ODE"><figcaption>
@@ -58,7 +58,7 @@ Assume $\Delta t=1$ and the initial condition $x(0)=0.5$. Then,
 To find the position at any time $t$, we sum the velocity function:
 
 $$
-x(t) = x(0) + \sum_{\tau=0}^t f(x(\tau), \tau) \cdot \Delta t
+x(t) = x(0) + \sum_{\tau=0}^{t- \Delta t} f(x(\tau), \tau) \cdot \Delta t
 $$
 
 This is discretized version of integration, using the Euler method.
@@ -70,7 +70,7 @@ $$
 x_{k+1} = x_k + f_{\theta}(x_k, k)
 $$
 
-Assume a neural network that takes $x_k$ and $k$ and gives $f(x_k, k)$. If we set the step size $\Delta t = 1$, the ResNet equation becomes identical to the Euler integrator. This is actually the Euler numerical integrator for the given ODE where we take a time step of 1 and integrate the velocity function from time step 0 to $T$.
+Assume a neural network that takes $x_k$ and $k$ and gives $f(x_k, k)$. If we set the step size $\Delta t = 1$, the Euler integrator becomes identical to the ResNet equation. This is actually the Euler numerical integrator for the given ODE where we take a time step of 1 and integrate the velocity function from time step 0 to $T$.
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/resnet_01.png' alt="A ResNet Block"><figcaption>
@@ -84,7 +84,7 @@ Assume a neural network that takes $x_k$ and $k$ and gives $f(x_k, k)$. If we se
 
 The idea of ResNet is that if we want to model the relationship between $x_k$ and $x_{k+1}$, we can actually copy the input directly over and only model the difference between the input $x_k$ and the output $x_{k+1}$. We are modeling the residual with our neural network, thus the name Residual Network. The residual the neural network learns can be thought of as the vector field of an ODE.
 
-We start with the initial condition $x_0=0$, feed this to the neural network to get $x_1$, feed this again to get $x_2$, etc. To get to $x_5$, we need to repeat this block 5 times. Running five blocks is equivalent to integrating the velocity function from $t=0$ to $t=5$.
+We start with the initial condition $x_0=0$, feed this to the neural network to get $x_1$, feed this again to get $x_2$, etc. To get to $x_5$, we need to repeat this block 5 times. Running five blocks is equivalent to integrating (or summing) the velocity function from $t=0$ to $t=5$.
 
 * Step 1: $x_1 = x_0 + f_{\theta}(x_0, 0)$
 * Step 2: $x_2 = x_1 + f_{\theta}(x_1, 1)$
@@ -137,37 +137,39 @@ $$
 $$
 
 
-* The unfolding steps above are discrete unfolding of the particle flow ODE, i.e., we looked at the discrete-time approximation of the ODE. The particle ODE (which is the continuous version) has these unfoldings for every $t$. We can think of this as similar to RNNs (with skip connection) but with continuous set of layers. Such RNNs are known as Neural ODEs.
+* The unfolding steps above are discrete unfolding of the particle flow ODE, i.e., we looked at the unfolding at every discrete time step $t + \Delta t$. But the particle ODE (which is the continuous version) has these unfoldings for every $t \in \mathbb{R}$. We can think of this as similar to RNNs (with skip connection) but with continuous set of layers. Such RNNs are known as Neural ODEs.
 
 * Euler integrator is a very quick and dirty way to solve ODEs. There are many more advanced numerical integrators (like Runge-Kutta methods) that can provide better accuracy and stability.
 
 These two aspects lead us to the idea of Neural ODEs. Instead of modeling the discretized version of the ODE, we can model the differential equation itself. That is, we can model the actual vector field $v$ using a neural network, and then use a sophisticated ODE solver to compute the next state.
 
 ## Neural ODE
-The idea of a neural ODE is that with our neural network $f$, we are going to model the continuous-time differential equation itself.
+The idea of a neural ODE is that with our neural network $f$ and an ODE solver, we are going to model the continuous-time differential equation itself.
 
 $$
 \frac{dx(t)}{dt} = f_{\theta}(x(t), t)
 $$
 
+A Neural ODE network outputs the particle position at time $t$. To be more precise, the network uses a neural network to parameterize the velocity field (the derivative), and the final output of the model is the result of an ODE solver that integrates that velocity to find the state of the system at a requested time point.
+
 <figure markdown="0" class="figure zoomable">
-<img src='./images/neural_ode_01.png' alt="Neural ODE Block"><figcaption>
+<img src='./images/neural_ode_01.png' alt="Neural ODE Block", width=400><figcaption>
   <strong>Figure 4.</strong> Neural ODE Block
   </figcaption>
 </figure>
 
-Here we model $f$ with a deep neural network. The goal during training is to learn the vector field $f_{\theta}$ by adjusting the parameters $\theta$ of the neural network so that the solution $x(t)$ (the resulting flow) has desired properties. The training process involves optimizing the parameters $\theta$ to minimize a loss function that measures how well the final distribution matches the data distribution. After large $t$, the sample's distribution $x(t) \sim p_t$ should match the data distribution $p_{data}$.
+Here we model $f$ with a deep neural network. The goal during training is to learn the vector field $f_{\theta}$ by adjusting the parameters $\theta$ of the neural network so that the solution $x(t)$ (the resulting flow) has desired properties. The training process involves optimizing the parameters $\theta$ to minimize a loss function that measures how well the final distribution matches the data distribution. After large $t$, the sample's distribution $x(t) \sim p_t$ should match the target distribution $p^*$.
 
-Once it is trained, we have learned the parameters $\theta$ of a vector field. That is, it has learned the vector field from the given data. Then, if we pass $(x(0),0)$, it outputs
+Once it is trained, the network has learned the parameters $\theta$ of a vector field from the given data. Then, if we pass $(x(0),0)$, it outputs
 
 $$
 f_{\theta}(x(0), 0) = \frac{dx(t)}{dt} \Big|_{t=0}
 $$
 
-i.e. the instantaneous velocity (direction field) at time $t=0$. $f_{\theta}$ only tells us how to move locally. To obtain the state at a later time $T$, we must integrate the ODE:
+i.e. the instantaneous velocity (direction field) at time $t=0$. $f_{\theta}$ only tells us how to move locally. To obtain the state at a later time $T$, we must pass the output $f_{\theta}(x(0), 0)$ to the same neural ODE network, and repeat the process again and again. The final output will be very close to:
 
 $$
-x(T) = x(0) + \int_0^T f_{\theta}(x(t), t) dt
+x(T) = x(0) + \int_0^T f_{\theta}(x(t), t)\, dt
 $$
 
-The integral is computed using a sophisticated ODE solver, which numerically approximates the solution by taking small steps and evaluating the function $f_{\theta}$ at each step. This allows us to obtain a continuous trajectory of $x(t)$ over time.
+Neural ODE uses a sophisticated ODE solver, which numerically approximates the solution by taking tiny steps and evaluating the function $f_{\theta}$ at each step. This allows us to obtain a continuous trajectory of $x(t)$ over time.

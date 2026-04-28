@@ -11,7 +11,7 @@ toc: true
 ## Problem Statement
 Consider the case where there is no random perturbation. When $v_t$ is designed (or learned) and fixed, the particle follows a deterministic path. Thus, there is no concept of limiting distribution. So, we look at achieving the target distribution in finite time steps. 
 
-Suppose we start with $p_0$ at $t=0$ and we reach $p_1$ at $t=1$. We want $p_1$ to be our target distribution. We want to learn $v_t$ such that $p_1=p^*$ is achieved. In general, we are given only samples from $p^*$, so learning $v_t$ will be a learning problem. Here from the sampling aspect, we are assuming that $p^*$ is known, so finding an appropriate $v_t$ is an optimization problem.
+Suppose we start with $p_0$ at $t=0$ and we reach $p_1$ at $t=1$. We want $p_1$ to be our target distribution. We want to learn $v_t$ such that $p_1=p^*$ is achieved. In general, we are given only samples from $p^*$, so learning $v_t$ will be a **learning problem**. Here from the sampling aspect, we are assuming that $p^*$ is known, so finding an appropriate $v_t$ is an **optimization problem**.
 
 ## Optimization Problem
 Suppose $p_0$ is our initial distribution (fixed) and we know $p^*$ which is also fixed. If $p_0$ and $p^*$ are known, we can compute $v_t$ which takes us from $p_0$ to $p^*$.
@@ -36,7 +36,7 @@ $$
 
 We are given $p_0$ and $p^*$. The function $v_t$ will be designed in such a way that it makes the sample points travel and as they reach $t=1$, their distribution will be $p^*$. This is similar to transformation of the initial likelihood to the target likelihood.
 
-At time steps $t>1$, it is not necessary that we remain at $p^*$. But we don't care, once we reach $t=1$, we can start sampling. Thus, $p^*$ doesn't need to be a stationary distribution to the process under this setup.
+At time steps $t>1$, it is not necessary that we remain at $p^*$. We don't care, once we reach $t=1$, we can start sampling. Thus, $p^*$ doesn't need to be a stationary distribution to the process under this setup.
 
 ## Learning $v_t$
 $v_t$ is a function that can be parameterized. On unfolding the ODE and suppose $\Delta t=1$, we get
@@ -51,7 +51,7 @@ x_T & = x_{T-1} + v_{T-1}(x_{T-1}) \tag{1}\\
 \end{align*}
 $$
 
-$x_T$ is a function of $x_0$, and this function depends on what is our velocity function. On looking at this unrolling of equations, we observe that the best way to parameterize $v_t$ is by an RNN. In RNN with skip connection, we typically do
+Here $v_0(x_0) = v(x_0, 0)$ and so on. And $x_T$ is a function of $x_0$, and this function depends on what is our velocity function. On looking at this unrolling of equations, we observe that the best way to parameterize $v_t$ is by a ResNet (or RNN with skip connections). In ResNet, we typically do
 
 $$
 \begin{align*}
@@ -62,9 +62,9 @@ x_T & = f(x_{T-1}) + x_{T-1} \\
 \end{align*}
 $$
 
-In RNNs, we usually have the same network $f$ (with same parameters). This architecture can be used to model the function $v(x_t, t)$.
+We usually have the same network $f$ (i.e., the same parameters for all time steps). This architecture can be used to model the function $v(x_t, t)$.
 
-Equations in <a href="#eq:eq1">(1)</a> are discrete unfolding of the particle flow ODE. The particle ODE (which is the continuous version) has these unfoldings for every $t$. We can think of this as similar to RNNs (with skip connection) but with continuous set of layers. Such RNNs are known as Neural ODEs.
+Equations in <a href="#eq:eq1">(1)</a> are discrete unfolding of the particle flow ODE. The particle ODE (which is the continuous version) has these unfoldings for every $t \in \mathbb{R}$. We can think of this as similar to RNNs (with skip connection) but with continuous set of layers. Such RNNs are known as Neural ODEs.
 
 We learn a function $f_{\theta}(x_t,t)$ using a model (neural ODE NN) by imposing the condition that the output from the model should be distributed according to our target distribution $p^*$. The solution
 
@@ -72,7 +72,7 @@ $$
 X_1 = X_0 + \int_0^1 f_{\theta}(X_t,t) \, dt
 $$
 
-should be distributed as the target $p^*$. It is evident that there could be multiple solutions to this problem. There can be many velocity fields that can takes us from $p_0$ to $p^*$. There are multiple regularization criteria we can explore, we can look for:
+should be distributed as the target $p^*$. It is evident that there could be multiple solutions to this problem. There can be many velocity fields that can take us from $p_0$ to $p^*$. There are multiple regularization criteria we can explore, we can look for:
 
 * Simple particle paths: straight line paths in the input space.
 * Simple likelihood paths: straight line paths in the likelihood space.

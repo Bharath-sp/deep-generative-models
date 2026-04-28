@@ -12,16 +12,16 @@ Langevin Diffusion based sampling guarantees convergence to $p^*$, but how many 
 ## Rate of Convergence
 Langevin Diffusion based sampling guarantees convergence to $p^*$ for any arbitrary distribution. But the rate of convergence may be exponentially slow. But to prove that convergence happens at an acceptable rate, we need some regularity conditions on $p^*$. One such condition is log-concave likelihood.
 
-We showed in our previous article that
+We showed in our previous article that for Langevin diffusion:
 
 <a name="eq:eq1"></a>
 $$
-\frac{d\mathcal{F}(t)}{dt} = - \int  p_t \, \| \nabla f_t \|^2 \tag{1}
+\frac{d\mathcal{F}(t)}{dt} = - \int  p_t \, \| \nabla f_t \|^2 \hspace{1cm} \forall x \tag{1}
 $$
 
 where $f_t(x) \equiv \log \frac{p_t(x)}{p^*(x)}$ is the relative error at $x$. At time $t$, consider two distributions, and think of $f_t$ as a function over $x$.
 
-* Then, the quantity $\int p_t f_t^2 = \mathbb{E}[f_t^2]$ is the expected total squared error. This integral is zero if and only if $f_t=0$ (assuming $p_t>0$) for all $x$.
+* The quantity $\int p_t f_t^2 = \mathbb{E}[f_t^2]$ is the expected total squared error. This integral is zero if and only if $f_t=0$ (assuming $p_t>0$) for all $x$.
 * The quantity $\int  p_t \, \| \nabla f_t \|^2 dx = \mathbb{E}[\| \nabla f_t(X) \|^2]$ is also a measure of the total error. This is a measure of bad energy involved in the diffusion process, called as Dirichlet energy of $f_t$. It measures how rapidly the function $f_t$ changes on average under $p_t$. A large value indicates steep, oscillatory, or highly varying function over $x$. If this is the case, say at time $t$, then from equation <a href="#eq:eq1">(1)</a>, we can see that the distance function decreases very fast at this $t$. This implies that if we start far away from $p^*$, the flow will take us very quickly to near $p^*$. If we start near $p^*$, then it will take us slowly, and eventually we will converge. Thus, the larger the Dirichlet energy (i.e., the more varying $f_t$ is), the faster is the rate of decrease of $\mathcal{F}(t)$.<br>
   This bad energy has to be dissipated, i.e., the lower it is, the better it is. The integral is 0 if and only if $\nabla f_t =\mathbf{0}$ for all $x$ which implies that $f_t$ should be a constant for all $x$. And we know that if for all $x$
 
@@ -41,7 +41,7 @@ $$
 I(t) = \int  p_t \, \| \nabla_x f_t \|^2 dx = - \frac{d\mathcal{F}(t)}{dt}
 $$
 
-We know that $I(t) \geq 0$ for all $t$. A famous result shows that he rate of change of Fisher information is proportional to two energy terms:
+We know that $I(t) \geq 0$ for all $t$. A famous result shows that the rate of change of Fisher information is proportional to two energy terms:
 
 <a name="eq:eq2"></a>
 $$

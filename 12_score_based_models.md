@@ -37,7 +37,7 @@ $$
 S_{\theta}(x) \equiv \nabla_x \log p_{\theta}(x)
 $$
 
-If we model the score function (Stein score) of the target distribution directly, then such models are called as score-based models.
+If we model the score function (Stein score) of the target distribution directly, then such models are called score-based models.
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/score_based_network.png' alt="" width=400><figcaption>
@@ -95,8 +95,9 @@ Then, using IBP trick:
 $$
 \begin{align*}
 \int S_{\theta}(x)^\top S^*(x) \, p^*(x) \, dx & = \int S_{\theta}(x)^\top \nabla p^*(x) \, dx \\
+& = - \int \nabla \cdot S_{\theta}(x) \,  p^*(x) \, dx \\
 & = - \int \nabla \cdot \nabla \log p_{\theta}(x) \, p^*(x) \, dx \\
-& \approx \frac{1}{m} \sum_{i=1}^m \Delta \log p_{\theta}(x_i)
+& = - \int \Delta \log p_{\theta}(x) \, p^*(x) \, dx \\
 \end{align*}
 $$
 

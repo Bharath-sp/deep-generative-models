@@ -87,7 +87,7 @@ A result says that corresponding to every SDE (SDEs where $\sigma_t$ is a consta
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/odes_hierarchy.png' alt="Intersection of diffusion and flow ODE"><figcaption>
-  <strong>Figure 1.</strong> Intersection of diffusion and flow ODEs in terms of likelihood view
+  <strong>Figure 1.</strong> Intersection of diffusion and flow ODEs in terms of likelihood view. c.SDEs are SDEs with a constant $\sigma_t$.
   </figcaption>
 </figure>
 

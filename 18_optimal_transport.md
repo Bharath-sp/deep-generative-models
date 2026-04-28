@@ -176,7 +176,13 @@ Suppose the source and target distributions are as in the figure. When we look a
 <img src='./images/wasserstein_distance.png' alt="" width=300>
 </figure>
 
-This proves that the WD maintains the underlying geometry (the underlying distance between the given points) when defining the distance between the distributions.
+This proves that the WD maintains the underlying geometry (the underlying distance between the given points) when defining the distance between the distributions. If you have a distribution of mass at $x=0$ and you want to move it to $x=10$, the Wasserstein distance reflects that 10-unit gap.
+
+<div class="admonition tip">
+  <p class="admonition-title">TIP</p>
+  <p> In the Wasserstein space, the Wasserstein distance between two distributions corresponds to the length of the shortest curve connecting the two distributions. By definition, it is the lowest possible cost (minimum work) required to turn one distribution into another. If you imagine the distributions as piles of soil, the Wasserstein distance is the amount of soil to move multiplied by the distance it has to travel.
+  </p>
+</div>
 
 
 

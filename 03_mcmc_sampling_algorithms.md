@@ -21,31 +21,38 @@ Say we are given a likelihood $p_{\theta}(x)$ from which we need to sample.
 
 If we were to produce samples from this distribution, then it is better to produce samples that are of higher likelihood in that distribution. So, we have to be near 100 because it has a higher likelihood in the target distribution. That is, there is a higher chance of picking a valid sample when our sample is near 100.
 
-Let's try to build some procedures for travelling towards the peak (modes) of the given likelihood. We already know standard algorithms such as gradient descent that try to go to the modes of the likelihoods to find the minimizer or maximizer of a function.
+Let's try to build some procedures for travelling towards the peak (modes) of the given likelihood. We already know standard algorithms such as gradient ascent that try to go to the peak of the function to find the maximizer.
 
-We will pick a random number between 0 and 1, say $x_0$. The likelihood of $x_0$, according to the target distribution, that is $p_{\theta}(x_0)$ might be low. We then make a gradient step:
+We will pick a random number, say $x_0$. The likelihood of $x_0$, according to the target distribution, that is $p_{\theta}(x_0)$ might be low. We then make a gradient step:
 
 <a name="eq:eq1"></a>
 $$
-x_1 := x_0 + \nabla \log p_{\theta}(x_0) \tag{1}
+x_1 := x_0 + \nabla_x \log p_{\theta}(x_0) \tag{1}
 $$
 
-This gradient is with respect to $x$. But when we take the gradient of the log-likelihood in MLE, the gradient is respect to $\theta$. Both are different. Here we are trying to find those $x$ that have higher likelihood.
+This gradient is with respect to $x$. Note that here we are trying to find the $x$ that has higher likelihood $\log p_{\theta}(x)$.
 
-* The gradient $\nabla_x \log p_{\theta}(x_0)$ is known as the **Stein Score**. 
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>In our traditional gradient ascent, we try to find the $\theta$ that has maximum likelihood $LL(\theta)$, so we take the gradient with respect to $\theta$ there.</p>
+</div>
+
+
+
+* The gradient $\nabla_x \log p_{\theta}(x)$ is known as the **Stein Score**. 
 * The gradient $\nabla_{\theta} \log p_{\theta}(x)$ is known as the **Fischer's Score**.
 
 In the computation of the Stein score, the partition function $Z(\theta)$ is not involved.
 
 $$
 \begin{align*}
-\nabla_x \log p_{\theta}(x_0) & = \nabla_x \log \frac{e^{-f_{\theta}(x)}}{Z(\theta)} \\
+\nabla_x \log p_{\theta}(x) & = \nabla_x \log \frac{e^{-f_{\theta}(x)}}{Z(\theta)} \\
 & = - \nabla_x f_{\theta}(x) - \nabla_x \log Z(\theta) \\
 & = - \nabla_x f_{\theta}(x)
 \end{align*}
 $$
 
-Since the second term is independent of $x$, it will be 0. So, we are left only with a gradient of the energy, which is force. In physical meaning, the Stein score is just a force on the particles located at $x$.
+Since the second term is independent of $x$, it will be 0. So, we are left only with a gradient of the energy with respect to $x$, which is force. In physical meaning, the Stein score is just a force on the particles located at $x$.
 
 Equation <a href="#eq:eq1">(1)</a> will make us move in the direction such that the function value will be increasing. NOTE: If $x_0$ is very far from 100, then $\nabla \log p_{\theta}(x_0)$ will be close to 0. But if it is at some reasonable distance from 100, then we get meaningful direction to move. 
 
@@ -55,23 +62,23 @@ One way to achieve this is by adding a noise component (random force). So, we ke
 
 <a name="eq:eq2"></a>
 $$
-x_{k+1} := x_k + \nabla \log p_{\theta}(x_k) + n_k \tag{2}
+x_{k+1} := x_k + \nabla_x \log p_{\theta}(x_k) + n_k \tag{2}
 $$
 
-The noise $n_k$ doesn't need to be additive. It is taken to be additive for simplification. The noise component makes it a random walk. The gradient component is purely a planned walk, it steadily takes us up the hill. We are combining these two (i.e., applying steady force and random force on the particles) and have to balance them properly. We must assign the weightages accordingly. By controlling their weightages, we can control how the samples $x$ evolve. The hope is that the limiting likelihood of $x_k$ as $k$ tends to infinity will be the target likelihood $p_{\theta}(x)$.
+The noise $n_k$ doesn't need to be additive. It is taken to be additive for simplification. The noise component makes it a random walk. The gradient component is purely a planned walk, it steadily takes us up the hill. We are combining these two (i.e., applying steady force and random force on the particles) and have to balance them properly. We must assign the weightages accordingly. By controlling their weightages, we can control how the samples $x$ evolve. The hope is that the distribution of $x_k$ as $k$ tends to infinity will be the target likelihood $p_{\theta}(x)$.
 
 Doing just equation <a href="#eq:eq2">(2)</a> with some arbitrary weightages for the gradient and the noise terms behaves like Stochastic gradient descent. Because typically, we will be assigning weightages of the same order such as $(s, s), (s, \frac{s}{100}), (s, 100s)$ etc. These guarantees the convergence to the modes of the distribution. So, the arbitrary combination of the gradient and noise terms doesn't work for sampling. There is a special combination:
 
 <a name="eq:eq3"></a>
 $$
-x_{k+1} := x_k + s \nabla \log p_{\theta}(x_k) + \sqrt{2s}\, n_k \tag{3}
+x_{k+1} := x_k + s \nabla_x \log p_{\theta}(x_k) + \sqrt{2s}\, n_k \tag{3}
 $$
 
 Where $s$ is a small number (learning rate) and $\sqrt{2s}$ will be a large number. That is, the magnitude of the noise term should be an order of magnitude times more than the magnitude of the Stein's score such as $(s, \sqrt{s})$. So, here we are adding more noise than normal SGD.
 
 We can show that on continuing this process, after a lot of iterations, the sample $x_k$ will a very faithful sample from the target distribution $p_{\theta}$. The distribution of the samples $x_k$ at $k$ very large, will actually be $p_{\theta}$.
 
-In general, the algorithms based on this idea have the formula:
+In general, the algorithms based on this idea have this generic formula:
 
 $$
 x_{k+1} := x_k + s \cdot v_k(x_k) + \sqrt{s} \, \sigma_k(x_k) n_k
@@ -141,9 +148,7 @@ We start considering $x_k$ as valid samples once the chain reaches the steady st
 
 Therefore, we can follow this procedure, generate a trajectory by unfolding equation <a href="#eq:eq4">(4)</a>. For practical purpose, let's assume $k=1000$, then $x_{1001}, x_{1002}, \dots$ will all be from the same target distribution, $p_{\theta}$. They all are identically distributed, but technically we also need independent samples. Here the sample $x_{1002}$ is dependent on its previous sample. So, we don't consider consecutive samples as the valid ones. We can either start a new chain to get the next sample or leave 50 samples (till $x_{1051}$) and consider $x_{1052}$ as the next sample. After 50 iterations, the dependence of $x_{1052}$ on $x_{1001}$ will become very low, so we believe $x_{1052}$ to be independent of $x_{1001}$.
 
-A clever choice of $v_k$ and $\sigma_k$ will make the chain reach the desired target distribution. There is no unique choice of $v_k$ and $\sigma_k$ to get a desired steady state distribution. There can be many of such choices leading to the same steady state distribution.
-
-In equation <a href="#eq:eq4">(4)</a>, if we consider $v_k$ the Stein score and $\sigma_k = \sqrt{2}$, then the algorithm is known as **Langevin Diffusion**.
+A clever choice of $v_k$ and $\sigma_k$ will make the chain reach the desired target distribution. There is no unique choice of $v_k$ and $\sigma_k$ to get a desired steady state distribution. There can be many of such choices leading to the same steady state distribution. In equation <a href="#eq:eq4">(4)</a>, if we consider $v_k$ the Stein score and $\sigma_k = \sqrt{2}$, then the algorithm is known as **Langevin Diffusion**.
 
 
 

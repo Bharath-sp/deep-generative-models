@@ -112,7 +112,7 @@ $$
 \nabla p(\tilde{x}) = \int \left( \nabla  q(\tilde{x}\, | \, x) \right) \, r(x) \, dx \tag{2}
 $$
 
-Here $r$ doesn't involve $z$, hence it is a constant. We observe that the gradient of $p$ is only a function of gradient of $q$, and it is not a function of gradient of $r$. Now, suppose
+Here $r$ doesn't involve $\tilde{x}$, hence it is a constant. We observe that the gradient of $p$ is only a function of gradient of $q$, and it is not a function of gradient of $r$. Now, suppose
 
 * $q$ is a Gaussian distribution where computing its gradient is easy.
 * Sampling from $r$ is easy.
@@ -298,7 +298,7 @@ $$
 **Score Network Learning Procedure:**
 
 1. Get training data points $x_i$ which are samples from $p^*$. Assume there are $m$ training data points
-2. Add noise to them $\tilde{x}_i = x_i + n_i$ where $n_i \sim \mathcal{N}(0, \sigma^2I)$ which will then be samples from $p^*_{\sigma}$, where $i=1, \dots, m$.
+2. Add noise to them $\tilde{x}_i = x_i + n_i$ where $n_i \sim \mathcal{N}(0, \sigma^2I)$ which will then be samples from $\tilde{p}_{\sigma}$, where $i=1, \dots, m$.
 3. Pass these noisy samples $\tilde{x}_i$ through the score network to get $\tilde{S}_{\theta, \sigma}(\tilde{x}_i)$. These are our model predictions $\hat{y_i}$.
 4. Compute $\frac{(x_i - \tilde{x}_i )}{\sigma^2} $. These are our ground truth $y_i$.
 5. Then the objective

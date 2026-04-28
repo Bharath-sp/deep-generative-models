@@ -243,7 +243,7 @@ $$
 f^*(y) = \max_{x \, \in \, \text{dom}(f)} \{ x^\top y - f(x) \}
 $$
 
-It represents the maximum difference between a linear function, which is the inner product $x^\top y$ and $f(x)$. And $f^*$ is always a convex function, even if $f$ is not.
+It represents the maximum difference between a linear function, which is the inner product $x^\top y$ and $f(x)$. And $f^*$ is always a convex function, even if $f$ is not because the maximum over linear functions is always convex.
 
 We observe that we were expressing the convex functions in the form:
 
@@ -257,7 +257,7 @@ f(x) & = \max_y \{x^\top y + C(y)\} \\
 $$
 
 
-For a fixed $y$, we get a line of slope $y$ which is given by $x^\top y - f^*(y)$. We need this line to be below or equal to the function for all $x$.
+For a given $y$, the term $\{x^\top y - f^*(y)\}$ is a linear function in $x$, i.e., a line with slope $y$. We need this line to be below or equal to the function for all $x$.
 
 $$
 \begin{align*}
@@ -293,6 +293,11 @@ f(x) = \max_y \{x^\top y - f^*(y)\}
 $$
 
 For each $y$, the RHS gives a linear function in $x$. The maximum of all those functions at all $x$ gives us the $f(x)$.
+
+<div class="admonition note">
+  <p class="admonition-title">NOTE</p>
+  <p>For each fixed $x$, we solve a different optimization problem. Suppose the maximizer of a problem is $y^*$. This $y^*$ will be a function of $x$, i.e., $y^*(x)$.</p>
+</div>
 
 **Example:**
 Suppose $f(x)= x^\top x = \|x\|^2$. Compute its conjugate
@@ -425,8 +430,10 @@ $$
 f(x) = \max_y r(x, y)
 $$
 
-1. We first fix $x$ and compute the $\arg \max_y r(x, y)$, say $y^*$. 
-2. Now, fix $y=y^*$ and find $\nabla_x r(x,y^*)$. In this case, it would be $y^*$ (because it is a linear function and the second term doesn't involve $x$).
+Say we want to compute the derivative of $f(x)$ at $x=x_0$.
+
+1. We first fix $x=x_0$ and compute $\arg \max_y r(x_0, y)$, say $y^*$. 
+2. Now, fix $y=y^*$ and find $\nabla_x r(x,y^*) \lvert_{x=x_0}$. In this case, it would be $y^*$ (because it is a linear function and the second term doesn't involve $x$).
 
 Using the same logic on KL:
 

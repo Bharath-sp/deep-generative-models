@@ -11,11 +11,11 @@ What are the consequences of choosing a wrong $v_t$? We have to choose $v_t$ car
 {:toc}
 
 ## Particle and Probability Flow
-Assume the distribution is one-dimensional. Each particle $x_t$ moves according to the particle flow ODE defined by the velocity field $v_t(x_t)$. As these are random particles, there is a distribution associated with these particles at each time $t$. The distribution of these particles evolves according to the probability flow ODE. The figure below illustrates this concept:
+Assume the distribution is one-dimensional. Each particle $x_t$ moves according to the particle flow ODE defined by the velocity field $v_t(x_t)$. As these are random particles, there is a distribution associated with these particles at each time $t$. The distribution of these particles evolves according to the continuity equation. The figure below illustrates this concept:
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/particle_probability_flow.png' alt="particle and probability flow example"><figcaption>
-  <strong>Figure 1.</strong> Particle and Probability Flow Example
+  <strong>Figure 1.</strong> Particle and Probability Flow example for flow ODEs
   </figcaption>
 </figure>
 
@@ -27,7 +27,7 @@ For every particle flow, there is an associated probability flow. Similarly, for
 
 Our assumption is that as $t \to \infty$, we get a limiting distribution. And our hope is that this limiting distribution should be our target distribution.
 
-<div class="admonition tip">
+<div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>Limiting distribution: A distribution that you converge to regardless of where you start. Every limiting distribution is stationary, but not every stationary distribution is a limiting distribution.</p>
 </div>
@@ -118,7 +118,7 @@ Consider a simple Markov chain. Start with any state distribution. And regardles
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/markov_chain_01.png' alt="Markov chain examples" height=150><figcaption>
-  <strong>Figure 2.</strong> Markov chain examples
+  <strong>Figure 2.</strong> Markov chain examples that have a limiting distribution
   </figcaption>
 </figure>
 
@@ -131,7 +131,7 @@ As $t\to \infty$, $p_t$ will become $[0,1]$. Thus, the limiting distribution for
 
 <figure markdown="0" class="figure zoomable">
 <img src='./images/markov_chain_02.png' alt="Markov chain examples" height=150><figcaption>
-  <strong>Figure 3.</strong> Markov chain examples
+  <strong>Figure 3.</strong> Markov chain examples that do have a limiting distribution
   </figcaption>
 </figure>
 

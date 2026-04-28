@@ -105,7 +105,7 @@ Analogous to ODE case, we need to restrict drift and diffusion terms so that thi
 
 While the primal (particle) view is essential for generating samples, it is important to understand the dynamics of the corresponding marginals, $X_t \sim p_t$ because we wish to design SDEs such that $p_t \to p^*$.
 
-Fokker Plank Equation is analogous to continuity equation that tells us how likelihood of Ito processes evolve. We know that the expectation equation connects explicitly the random variable $X_t$ and $p_t(x)$:
+Fokker Planck Equation is analogous to continuity equation that tells us how likelihood of Ito processes evolve. We know that the expectation equation connects explicitly the random variable $X_t$ and $p_t(x)$:
 
 $$
 \mathbb{E}[f(X_t)] = \int f(x) \, p_t(x) \, dx
